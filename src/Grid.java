@@ -118,21 +118,29 @@ public class Grid implements IGameObject {
 				
 				int x = placement.getxIndex();
 				int y = placement.getyIndex();
-				markers[x][y] = new Marker(x, y, markerIndex);
-				
-				markerIndex ++;
-				
-				ArrayList<Marker> winLine = Checker.checkWin(markers);
-				
-				if(winLine != null) {
-					winLine.forEach(marker -> marker.setWon(true));
-					winType = winLine.get(0).getType();
-					gameEnd = true;
-					
-				} else if(markerIndex >= Main.SIZE) {
-					gameEnd = true;
-				}
+				placeMarker(x, y);
 			}
+		}
+	}
+
+	public void placeMarker(int moveIndex) {
+		placeMarker(moveIndex % Main.ROWS, moveIndex / Main.ROWS);
+	}
+
+	private void placeMarker(int x, int y) {
+		markers[x][y] = new Marker(x, y, markerIndex);
+		
+		markerIndex ++;
+		
+		ArrayList<Marker> winLine = Checker.checkWin(markers);
+		
+		if(winLine != null) {
+			winLine.forEach(marker -> marker.setWon(true));
+			winType = winLine.get(0).getType();
+			gameEnd = true;
+			
+		} else if(markerIndex >= Main.SIZE) {
+			gameEnd = true;
 		}
 	}
 	
@@ -155,6 +163,14 @@ public class Grid implements IGameObject {
 	
 	public boolean isGameEnd() {
 		return gameEnd;
+	}
+
+	public int getTurn() {
+		return markerIndex % 2;
+	}
+
+	public Marker[][] getMarkers() {
+		return markers;
 	}
 
 }

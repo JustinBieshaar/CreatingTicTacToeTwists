@@ -32,6 +32,11 @@ public class Marker implements IGameObject {
 	}
 	
 
+	public Marker(int type) {
+		this.type = type % 2;
+	}
+
+
 	@Override
 	public void update(float deltaTime) {
 		if(won) {
