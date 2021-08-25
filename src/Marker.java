@@ -8,18 +8,24 @@ import javax.imageio.ImageIO;
 public class Marker implements IGameObject {
 	
 	private BufferedImage marker;
-	
+
 	private int x;
 	private int y;
+	private int startX;
+	private int startY;
+	private int size;
 	private int type;
 	
 	private boolean won = false;
 	private float alpha = 1;
 	private float fadeSpeed = 0.05f;
 	
-	public Marker(int x, int y, int type) {
+	public Marker(int x, int y, int startX, int startY, int size, int type) {
 		this.x = x;
 		this.y = y;
+		this.startX = startX;
+		this.startY = startY;
+		this.size = size;
 		
 		this.type = type % 2;
 		String markerType = this.type == 0 ? "x" : "o";
@@ -61,8 +67,8 @@ public class Marker implements IGameObject {
 		AlphaComposite ac = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha);
 		graphicsRender.setComposite(ac);
 		
-		int size = Main.WIDTH / Main.ROWS;
-		graphicsRender.drawImage(marker, x * size, y * size, size, size, null);
+		int size = this.size / Main.ROWS;
+		graphicsRender.drawImage(marker, startX + x * size, startY + y * size, size, size, null);
 
 		ac = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1);
 		graphicsRender.setComposite(ac);
