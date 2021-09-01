@@ -74,5 +74,28 @@ public class Checker {
 
 		return match == null ? -1 : match.get(0).getType();
 	}
+
+	public static ArrayList<Placement> getNeighbours(Placement selectedMarker, ArrayList<Placement> placements) {
+		ArrayList<Placement> result = new ArrayList<Placement>();
+		int x = selectedMarker.getxIndex();
+		int y = selectedMarker.getyIndex();
+		
+		for (int i = -1; i <= 1; i++) {
+			for (int j = -1; j <= 1; j++) {
+				int index = getIndexRelativeToXY(x + i, y + j);
+				if(index >= 0 && index < placements.size()) {
+					result.add(placements.get(index));
+				}
+			}
+		}
+		return result;
+	}
+
+	private static int getIndexRelativeToXY(int x, int y) {
+		if(x < 0 || y < 0) {
+			return -1;
+		}
+		return (Main.ROWS * y) + x;
+	}
 	
 }

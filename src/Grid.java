@@ -8,6 +8,8 @@ public class Grid implements IGameObject {
 	private ArrayList<Placement> placements = new ArrayList<Placement>(Main.SIZE);
 	private Marker[][] markers;
 	
+	private Placement selectedMarker = null;
+	
 	private int gridThickness = 16;
 	private int markerIndex = 0;
 	private boolean gameEnd = false;
@@ -51,6 +53,8 @@ public class Grid implements IGameObject {
 			placement.render(graphicsRender);
 		}
 		
+		renderGrid(graphicsRender);
+		
 		for (int x = 0; x < markers.length; x++) {
 			for (int y = 0; y < markers.length; y++) {
 				if(markers[x][y] == null) {
@@ -61,8 +65,9 @@ public class Grid implements IGameObject {
 			}
 		}
 		
-		renderGrid(graphicsRender);
-		
+		if(gameEnd) {
+			drawEndGameOverlay(graphicsRender);
+		}
 	}
 
 	private void renderGrid(Graphics2D graphicsRender) {
@@ -77,10 +82,6 @@ public class Grid implements IGameObject {
 		}
 		
 		graphicsRender.setColor(Color.white);
-		
-		if(gameEnd) {
-			drawEndGameOverlay(graphicsRender);
-		}
 	}
 
 	private void drawEndGameOverlay(Graphics2D graphicsRender) {
@@ -107,17 +108,70 @@ public class Grid implements IGameObject {
 		}
 		
 		for (Placement placement : placements) {
-			placement.checkCollision(e.getX(), e.getY() - 30);
+			if(checkPlacement(placement)) {
+				placement.checkCollision(e.getX(), e.getY() - 30);
+			}
 		}
+	}
+	
+	private boolean checkPlacement(Placement placement) {
+		Marker marker = markers[placement.getxIndex()][placement.getyIndex()];
+		return markerIndex >= Main.MATCH * 2 &&
+				(selectedMarker == null || selectedMarker == placement)
+				? placement.isMarkerPlaced() && marker.getType() == markerIndex % 2 : !placement.isMarkerPlaced();
 	}
 
 	public void mouseReleased(MouseEvent e) {
+		ArrayList<Placement> neighbours = null;
+		if(selectedMarker != null) {
+			neighbours = Checker.getNeighbours(selectedMarker, placements);
+		}
 		for (Placement placement : placements) {
 			if(placement.isActive()) {
-				placement.set(true);
-				
 				int x = placement.getxIndex();
 				int y = placement.getyIndex();
+				if(markerIndex >= Main.MATCH * 2) {
+					if(selectedMarker == null && markers[x][y].getType() == markerIndex % 2) {
+						// first click
+						selectedMarker = placement;
+						selectedMarker.setSelected(true);
+					} else if(selectedMarker != null) {
+						// second click
+						if(selectedMarker == placement) {
+							selectedMarker.setSelected(false);
+							selectedMarker = null;
+							return;
+						}
+						
+						if(neighbours.contains(placement)) {
+							// found a match, move marker to this placement!
+							Marker marker = markers[selectedMarker.getxIndex()][selectedMarker.getyIndex()];
+							markers[selectedMarker.getxIndex()][selectedMarker.getyIndex()] = null;
+							markers[x][y] = marker;
+							marker.updatePosition(x, y);
+							
+							selectedMarker.set(false);
+							selectedMarker.setActive(false);
+							selectedMarker.setSelected(false);
+							selectedMarker = null;
+							
+							placement.set(true);
+							markerIndex++;
+							checkWin();
+							return;
+						} else {
+							// no match, toggle marker
+							selectedMarker.setActive(false);
+							selectedMarker.setSelected(false);
+							selectedMarker = null;
+							placement.set(false);
+							placement.setActive(false);
+							return;
+						}
+					}
+					break;
+				}
+				placement.set(true);
 				placeMarker(x, y);
 			}
 		}
@@ -132,6 +186,10 @@ public class Grid implements IGameObject {
 		
 		markerIndex ++;
 		
+		checkWin();
+	}
+
+	private void checkWin() {
 		ArrayList<Marker> winLine = Checker.checkWin(markers);
 		
 		if(winLine != null) {
@@ -139,8 +197,6 @@ public class Grid implements IGameObject {
 			winType = winLine.get(0).getType();
 			gameEnd = true;
 			
-		} else if(markerIndex >= Main.SIZE) {
-			gameEnd = true;
 		}
 	}
 	
@@ -159,6 +215,7 @@ public class Grid implements IGameObject {
 		gameEnd = false;
 		winType = -1;
 		markerIndex = 0;
+		selectedMarker = null;
 	}
 	
 	public boolean isGameEnd() {

@@ -7,7 +7,7 @@ public class Main {
 	public static int WIDTH = 500;
 	public static int HEIGHT = 500;
 	
-	public static int ROWS = 3;
+	public static int ROWS = 4;
 	public static int MATCH = 3;
 	public static int SIZE = ROWS * ROWS;
 	

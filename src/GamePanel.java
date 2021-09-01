@@ -52,16 +52,7 @@ public class GamePanel extends Panel implements MouseMotionListener, MouseInputL
 			grid.reset();
 		}
 		
-		if(!ai.isMoving()) {
-			grid.mouseReleased(e);
-		}
-		
-		if(!grid.isGameEnd()) {
-			if(grid.getTurn() == 1) {
-				// 1 == O
-				ai.makeMove();
-			}
-		}
+		grid.mouseReleased(e);
 	}
 
 	@Override
