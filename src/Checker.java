@@ -91,6 +91,22 @@ public class Checker {
 		return result;
 	}
 
+	public static ArrayList<SwipePlacement> getNeighbours(SwipePlacement selectedMarker, ArrayList<SwipePlacement> placements) {
+		ArrayList<SwipePlacement> result = new ArrayList<SwipePlacement>();
+		int x = selectedMarker.getxIndex();
+		int y = selectedMarker.getyIndex();
+		
+		for (int i = -1; i <= 1; i++) {
+			for (int j = -1; j <= 1; j++) {
+				int index = getIndexRelativeToXY(x + i, y + j);
+				if(index >= 0 && index < placements.size()) {
+					result.add(placements.get(index));
+				}
+			}
+		}
+		return result;
+	}
+
 	private static int getIndexRelativeToXY(int x, int y) {
 		if(x < 0 || y < 0) {
 			return -1;

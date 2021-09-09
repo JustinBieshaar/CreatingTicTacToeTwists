@@ -1,8 +1,7 @@
-  
 import java.awt.Color;
 import java.awt.Graphics2D;
 
-public class Placement implements IGameObject {
+public class UltimatePlacement implements IGameObject {
 
 	private Color hoverColor = new Color(0xa0a0a0);
 	
@@ -20,7 +19,7 @@ public class Placement implements IGameObject {
 	private int width;
 	private int height;
 	
-	public Placement(int x, int y, int xIndex, int yIndex, int width, int height) {
+	public UltimatePlacement(int x, int y, int xIndex, int yIndex, int width, int height) {
 		this.x = x;
 		this.y = y;
 		this.xIndex = xIndex;

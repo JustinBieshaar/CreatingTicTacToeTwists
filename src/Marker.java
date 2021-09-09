@@ -8,11 +8,17 @@ import javax.imageio.ImageIO;
 public class Marker implements IGameObject {
 	
 	private BufferedImage marker;
-	
+	private IMarkerObserver observer;
+
 	private float x;
 	private float y;
+	private int startX;
+	private int startY;
 	
 	private int size;
+	private float scale = 2;
+	
+	private boolean animateIn;
 	
 	private int type;
 	
@@ -20,9 +26,25 @@ public class Marker implements IGameObject {
 	private float targetY;
 	
 	private boolean won = false;
-	private float alpha = 1;
+	private float alpha = 0;
 	private float fadeSpeed = 0.05f;
-	private float moveSpeed = 10f;
+	private float moveSpeed = 20f;
+	private float scaleSpeed = 0.1f;
+	
+	public Marker(int x, int y, int startX, int startY, int size, int type) {
+		this(x, y, type);
+		this.startX = startX;
+		this.startY = startY;
+		
+		this.size = size / Main.ROWS;
+		this.x = startX + (x * this.size);
+		this.y = startY + (y * this.size);
+
+		System.out.println(this.x + " | " + this.y + " || start " + startX + " | " + startY + " || xy " + x + " | " + y + " || " + size);
+		
+		this.targetX = this.x;
+		this.targetY = this.y;
+	}
 	
 	public Marker(int x, int y, int type) {
 		size = Main.WIDTH / Main.ROWS;
@@ -31,6 +53,8 @@ public class Marker implements IGameObject {
 
 		this.targetX = this.x;
 		this.targetY = this.y;
+		
+		this.animateIn = true;
 		
 		this.type = type % 2;
 		String markerType = this.type == 0 ? "x" : "o";
@@ -47,9 +71,15 @@ public class Marker implements IGameObject {
 		this.type = type % 2;
 	}
 
+	public void registerObserver(IMarkerObserver observer) {
+		this.observer = observer;
+	}
 
 	@Override
 	public void update(float deltaTime) {
+		if(animateIn) {
+			scaleIn(deltaTime);
+		}
 		if(x != targetX || y != targetY) {
 			moveMarker(deltaTime);
 		}
@@ -68,6 +98,31 @@ public class Marker implements IGameObject {
 			}
 		}
 	}
+
+	private void scaleIn(float deltaTime) {
+		scale -= scaleSpeed * deltaTime;
+		alpha += scaleSpeed * deltaTime;
+		
+		boolean isScaling = scale > 1;
+		boolean isFading = alpha < 1;
+		if(!isScaling) {
+			scale = 1;
+		}
+		if(!isFading) {
+			alpha = 1;
+		}
+		if(!isScaling && !isFading) {
+			animateIn = false;
+			fireOnAnimated();
+		}
+	}
+	
+	private void fireOnAnimated() {
+		if(observer != null) {
+			observer.animated();
+		}
+	}
+
 
 	private void moveMarker(float deltaTime) {
 		int xD = 0;
@@ -89,6 +144,10 @@ public class Marker implements IGameObject {
 		if((yD > 0 && y > targetY) || (yD < 0 && y < targetY)) {
 			y = targetY;
 		}
+		
+		if(x == targetX && y == targetY) {
+			fireOnAnimated();
+		}
 	}
 
 
@@ -97,8 +156,10 @@ public class Marker implements IGameObject {
 		
 		AlphaComposite ac = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha);
 		graphicsRender.setComposite(ac);
-		
-		graphicsRender.drawImage(marker, (int) x, (int) y, size, size, null);
+
+		int markerSize = (int)(size * scale);
+		int pivot = (size - markerSize) / 2;
+		graphicsRender.drawImage(marker, (int) x + pivot, (int) y + pivot, markerSize, markerSize, null);
 
 		ac = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1);
 		graphicsRender.setComposite(ac);

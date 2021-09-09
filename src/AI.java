@@ -27,7 +27,7 @@ public class AI implements IGameObject {
 		
 		currentTime += deltaTime;
 		if(currentTime >= timeInterval) {
-			grid.placeMarker(minimax.getBestMove(grid.getMarkers(), grid.getTurn()));
+			//grid.placeMarker(minimax.getBestMove(grid.getMarkers(), grid.getTurn()));
 			startTimer = false;
 		}
 	}
